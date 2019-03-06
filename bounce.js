@@ -20,6 +20,10 @@ var step = function() {
     render();
     animate(step);
 };
+  update();
+  render();
+  animate(step);
+};
 
 function Ball(x, y) {
     this.x = x;
@@ -36,12 +40,13 @@ Ball.prototype.render = function() {
     context.fill();
 };
 
-var ball = new Ball(200, 300);
+var ball = new Ball(200, 550);
 
 var render = function() {
     context.fillStyle = "#00bfff";
     context.fillRect(0, 0, width, height);
-    
+    context.fillStyle = "#800000";
+    context.fillRect(0,600,width,height-600);
     ball.render();
 };
 
@@ -104,4 +109,8 @@ Ball.prototype.forceAbove = function(y) {
 
 var update = function() {
     ball.update();
+};
+  context.fillStyle = "#00bfff";
+  context.fillRect(0, 0, width, height);
+  ball.render();
 };
