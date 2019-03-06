@@ -20,10 +20,6 @@ var step = function() {
     render();
     animate(step);
 };
-  update();
-  render();
-  animate(step);
-};
 
 function Ball(x, y) {
     this.x = x;
@@ -109,8 +105,4 @@ Ball.prototype.forceAbove = function(y) {
 
 var update = function() {
     ball.update();
-};
-  context.fillStyle = "#00bfff";
-  context.fillRect(0, 0, width, height);
-  ball.render();
 };
