@@ -23,12 +23,6 @@ var step = function() {
 
 var update = function() {
 };
-
-var render = function() {
-  context.fillStyle = "#00bfff";
-  context.fillRect(0, 0, width, height);
-};
-
 function Ball(x, y) {
   this.x = x;
   this.y = y;
@@ -44,33 +38,14 @@ Ball.prototype.render = function() {
   context.fill();
 };
 
-var ball = new Ball(200, 300);
+var ball = new Ball(200, 550);
 
 var render = function() {
   context.fillStyle = "#00bfff";
   context.fillRect(0, 0, width, height);
+  context.fillStyle = "#800000";
+  context.fillRect(0,600,width,height-600);
   ball.render();
 };
 
-var keysDown = {};
 
-window.addEventListener("keydown", function(event) {
-  keysDown[event.keyCode] = true;
-});
-
-window.addEventListener("keyup", function(event) {
-  delete keysDown[event.keyCode];
-});
-
-Ball.prototype.update = function() {
-  for(var key in keysDown) {
-    var value = Number(key);
-    if(value == 37) { // left arrow
-      this.paddle.move(-4, 0);
-    } else if (value == 39) { // right arrow
-      this.paddle.move(4, 0);
-    } else {
-      this.paddle.move(0, 0);
-    }
-  }
-};
