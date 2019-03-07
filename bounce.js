@@ -10,6 +10,12 @@ canvas.width = width;
 canvas.height = height;
 var context = canvas.getContext('2d');
 
+var getImage = function(location) {
+    var image = document.createElement("img");
+    image.src = location;
+    return image;
+}
+
 window.onload = function() {
     document.body.appendChild(canvas);
     animate(step);
@@ -26,7 +32,7 @@ function Ball(x, y) {
     this.y = y;
     this.x_speed = 0;
     this.y_speed = 3;
-    this.radius = 50;
+    this.radius = 30;
     this.isFalling = false;
 }
 
@@ -37,21 +43,28 @@ Ball.prototype.render = function() {
     context.fill();
 };
 
-var ball = new Ball(200, 550);
+var ball = new Ball(200, 720);
+
+var testImage = getImage("gsycoy jeyo.jfif");
 
 var render = function() {
     context.fillStyle = "#00bfff";
     context.fillRect(0, 0, width, height);
     context.fillStyle = "#800000";
-    context.fillRect(0,600,width,height-600);
+    context.fillRect(0,750,width,height-120);
 
     ball.render();
+    
+    context.drawImage(testImage, 0, 0, 100, 100);
 };
 
 var keysDown = {};
 
 window.addEventListener("keydown", function(event) {
-    keysDown[event.keyCode] = true;
+    var key = event.keyCode;+
+    console.log(ball.isFalling);
+    if(!ball.isFalling || (key != 32 && key != 38))
+        keysDown[key] = true;
 });
 
 window.addEventListener("keyup", function(event) {
@@ -70,15 +83,17 @@ Ball.prototype.update = function() {
                 break;
             case 32: // Jump
             case 38: // up
-                this.y_speed = -16;
-                this.isFalling = true;
+                if(!this.isFalling) {
+                    this.y_speed = -25;
+                    this.isFalling = true;
+                }
                 break;
         }
     }
 
     this.moveD();
     
-    if(this.x_speed != 0) {
+    if(keysDown[32] == undefined && keysDown[38] == undefined) {
         if(this.x_speed > 0) {
             if(this.x_speed < 0.5) {
                 this.x_speed = 0;
@@ -89,15 +104,15 @@ Ball.prototype.update = function() {
             if(this.x_speed > -0.5) {
                 this.x_speed = 0;
             } else {
-                this.x_speed += 0.5;
+                this.x_speed += 1.5;
             }
         }
     }
     if(this.isFalling) {
-        this.y_speed += 2;
+        this.y_speed += 0.6;
     }
     
-    this.forceAbove(550);
+    this.forceAbove(720);
 };
 
 Ball.prototype.move = function(dx, dy) {
@@ -113,13 +128,16 @@ Ball.prototype.moveD = function() {
 }
 
 Ball.prototype.forceAbove = function(y) {
-    if(this.y > y) this.y = y;
+    if(this.y > y) {
+        this.y = y;
+        this.y_speed = 0;
+        this.isFalling = false;
+    }
 }
 
 Ball.prototype.forceBelow = function(y) {
     if(this.y < y) {
         this.y = y;
-        this.isFalling = false;
         this.y_speed = 0;
     }
 }
