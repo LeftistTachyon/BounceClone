@@ -27,6 +27,7 @@ function Ball(x, y) {
     this.x_speed = 0;
     this.y_speed = 3;
     this.radius = 50;
+    this.isFalling = false;
 }
 
 Ball.prototype.render = function() {
@@ -43,6 +44,7 @@ var render = function() {
     context.fillRect(0, 0, width, height);
     context.fillStyle = "#800000";
     context.fillRect(0,600,width,height-600);
+
     ball.render();
 };
 
@@ -59,32 +61,43 @@ window.addEventListener("keyup", function(event) {
 Ball.prototype.update = function() {
     for(var key in keysDown) {
         var value = Number(key);
-        var pressed = false;
         switch(value) {
             case 37: // [<-]
                 this.x_speed = -4;
-                pressed = true;
                 break;
             case 39: // [->]
-                if(pressed) {
-                    this.x_speed = 0;
-                } else {
-                    this.x_speed = 4;
-                }
+                this.x_speed = 4;
                 break;
             case 32: // Jump
             case 38: // up
-                this.y_speed = 16;
+                this.y_speed = -16;
+                this.isFalling = true;
                 break;
         }
     }
+
+    this.moveD();
     
-    this.move();
+    if(this.x_speed != 0) {
+        if(this.x_speed > 0) {
+            if(this.x_speed < 0.5) {
+                this.x_speed = 0;
+            } else {
+                this.x_speed -= 0.5;
+            }
+        } else {
+            if(this.x_speed > -0.5) {
+                this.x_speed = 0;
+            } else {
+                this.x_speed += 0.5;
+            }
+        }
+    }
+    if(this.isFalling) {
+        this.y_speed += 2;
+    }
     
-    this.x_speed /= 2;
-    this.y_speed -= 2;
-    
-    // this.forceAbove(1200);
+    this.forceAbove(550);
 };
 
 Ball.prototype.move = function(dx, dy) {
@@ -101,6 +114,14 @@ Ball.prototype.moveD = function() {
 
 Ball.prototype.forceAbove = function(y) {
     if(this.y > y) this.y = y;
+}
+
+Ball.prototype.forceBelow = function(y) {
+    if(this.y < y) {
+        this.y = y;
+        this.isFalling = false;
+        this.y_speed = 0;
+    }
 }
 
 var update = function() {
