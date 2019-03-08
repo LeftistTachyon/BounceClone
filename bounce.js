@@ -47,22 +47,10 @@ var ball = new Ball(200, 720);
 
 var testImage = getImage("gsycoy jeyo.jfif");
 
-var render = function() {
-    context.fillStyle = "#00bfff";
-    context.fillRect(0, 0, width, height);
-    context.fillStyle = "#800000";
-    context.fillRect(0,750,width,height-120);
-
-    ball.render();
-    
-    context.drawImage(testImage, 0, 0, 100, 100);
-};
-
 var keysDown = {};
 
 window.addEventListener("keydown", function(event) {
-    var key = event.keyCode;+
-    console.log(ball.isFalling);
+    var key = event.keyCode;
     if(!ball.isFalling || (key != 32 && key != 38))
         keysDown[key] = true;
 });
@@ -89,11 +77,13 @@ Ball.prototype.update = function() {
                 }
                 break;
         }
+        
+        console.log(key);
     }
 
     this.moveD();
     
-    if(keysDown[32] == undefined && keysDown[38] == undefined) {
+    if(keysDown[32] == undefined && keysDown[39] == undefined) {
         if(this.x_speed > 0) {
             if(this.x_speed < 0.5) {
                 this.x_speed = 0;
@@ -104,7 +94,7 @@ Ball.prototype.update = function() {
             if(this.x_speed > -0.5) {
                 this.x_speed = 0;
             } else {
-                this.x_speed += 1.5;
+                this.x_speed += 0.5;
             }
         }
     }
@@ -130,8 +120,8 @@ Ball.prototype.moveD = function() {
 Ball.prototype.forceAbove = function(y) {
     if(this.y > y) {
         this.y = y;
-        this.y_speed = 0;
-        this.isFalling = false;
+        this.y_speed = Math.round(-this.y_speed/8);
+        if(this.y_speed == 0) this.isFalling = false;
     }
 }
 
@@ -149,7 +139,33 @@ var update = function() {
 function Spike(x, y){
     this.x = x;
     this.y = y;
-    this.isPoking = false;
-    
-    
+    this.width = 20;
+    this.height = 60;
 }
+
+Spike.prototype.render = function() {
+    context.fillStyle = "#91612B";
+    context.fillRect(this.x, this.y + 10, this.width, this.height - 10);
+    context.beginPath();
+    context.fillStyle = "#FFEE00";
+    context.arc(this.x + 10, this.y + 10, this.width/2, Math.PI * 2, false);
+    context.fill();
+}
+
+Spike.prototype.moveX = function(dX) {
+    this.x += dX;
+}
+
+var spike = new Spike(200, 690); // nice
+
+var render = function() {
+    context.fillStyle = "#00bfff";
+    context.fillRect(0, 0, width, height);
+    context.fillStyle = "#800000";
+    context.fillRect(0,750,width,height-120);
+
+    ball.render();
+    spike.render();
+    
+    context.drawImage(testImage, 0, 0, 100, 100);
+};
