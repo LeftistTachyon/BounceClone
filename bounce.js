@@ -59,6 +59,13 @@ window.addEventListener("keyup", function(event) {
     delete keysDown[event.keyCode];
 });
 
+Ball.prototype.jump = function() {
+    if(!this.isFalling) {
+        this.y_speed = -25;
+        this.isFalling = true;
+    }
+}
+
 Ball.prototype.update = function() {
     for(var key in keysDown) {
         var value = Number(key);
@@ -71,10 +78,7 @@ Ball.prototype.update = function() {
                 break;
             case 32: // Jump
             case 38: // up
-                if(!this.isFalling) {
-                    this.y_speed = -25;
-                    this.isFalling = true;
-                }
+                this.jump();
                 break;
         }
         
@@ -120,8 +124,15 @@ Ball.prototype.moveD = function() {
 Ball.prototype.forceAbove = function(y) {
     if(this.y > y) {
         this.y = y;
-        this.y_speed = Math.round(-this.y_speed/8);
-        if(this.y_speed == 0) this.isFalling = false;
+        if(keysDown[32] != undefined || keysDown[38] != undefined) {
+            this.isFalling = false;
+            this.jump();
+        } else {
+            this.y_speed = Math.round(-this.y_speed/8);
+            if(this.y_speed == 0) {
+                this.isFalling = false;
+            }
+       }
     }
 }
 
@@ -129,6 +140,20 @@ Ball.prototype.forceBelow = function(y) {
     if(this.y < y) {
         this.y = y;
         this.y_speed = 0;
+    }
+}
+
+Ball.prototype.forceLeft = function(x) {
+    if(this.x > x) {
+        this.x = x;
+        this.x_speed = 0;
+    }
+}
+
+Ball.prototype.forceRight = function(x) {
+    if(this.x < x) {
+        this.x = x;
+        this.x_speed = 0;
     }
 }
 
@@ -141,6 +166,21 @@ function Spike(x, y){
     this.y = y;
     this.width = 20;
     this.height = 60;
+}
+
+Spike.prototype.getDot = function(idx) {
+    switch(idx) {
+        case 0:
+            return new Point(this.x + this.width / 2, this.y + this.height / 2);
+        case 1:
+            return new Point(this.x, this.y);
+        case 2:
+            return new Point(this.x + this.width, this.y);
+        case 3:
+            return new Point(this.x + this.width, this.y + this.height);
+        case 4:
+            return new Point(this.x, this.y + this.height);
+    }
 }
 
 Spike.prototype.render = function() {
@@ -156,7 +196,7 @@ Spike.prototype.moveX = function(dX) {
     this.x += dX;
 }
 
-var spike = new Spike(200, 690); // nice
+var spike = new Spike(500, 690); // nice
 
 var render = function() {
     context.fillStyle = "#00bfff";
@@ -169,3 +209,15 @@ var render = function() {
     
     context.drawImage(testImage, 0, 0, 100, 100);
 };
+
+Ball.prototype.collides = function(box) {
+    var center_box = box.getDot(0);
+    
+    var max = Number.NEGATIVE_INFINITY;
+    var box2circle = new Vector2d(this.x - center_box.x, this.y - center_box.y);
+    var box2circle_normalised = box2circle.unitVector;
+    
+    
+}
+
+console.log()
