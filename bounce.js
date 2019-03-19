@@ -45,17 +45,18 @@ Ball.prototype.render = function() {
 
 var ball = new Ball(200, 720);
 
-var testImage = getImage("gsycoy jeyo.jfif");
+var testImage = getImage("Spike.png");
 
 var render = function() {
     context.fillStyle = "#00bfff";
     context.fillRect(0, 0, width, height);
     context.fillStyle = "#800000";
     context.fillRect(0,750,width,height-120);
+    context.fillRect(0,0,width,height-300);
 
     ball.render();
-    
-    context.drawImage(testImage, 0, 0, 100, 100);
+
+    context.drawImage(testImage, 500, 665, 100, 100);
 };
 
 var keysDown = {};
@@ -146,10 +147,6 @@ var update = function() {
     ball.update();
 };
 
-function Spike(x, y){
-    this.x = x;
-    this.y = y;
-    this.isPoking = false;
-    
-    
-}
+
+
+
