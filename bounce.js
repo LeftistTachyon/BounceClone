@@ -27,13 +27,23 @@ var step = function() {
     animate(step);
 };
 
+var keysDown = {};
+
 function Ball(x, y) {
     this.x = x;
     this.y = y;
     this.x_speed = 0;
-    this.y_speed = 3;
+    this.y_speed = 0;
     this.radius = 30;
     this.isFalling = false;
+    this.reset = function() {
+        this.x = x;
+        this.y = y;
+        this.x_speed = 0;
+        this.y_speed = 0;
+        this.isFalling = false;
+        keysDown = {};
+    }
 }
 
 Ball.prototype.render = function() {
@@ -46,8 +56,6 @@ Ball.prototype.render = function() {
 var ball = new Ball(200, 720);
 
 var testImage = getImage("gsycoy jeyo.jfif");
-
-var keysDown = {};
 
 window.addEventListener("keydown", function(event) {
     var key = event.keyCode;
@@ -65,49 +73,6 @@ Ball.prototype.jump = function() {
         this.isFalling = true;
     }
 }
-
-Ball.prototype.update = function() {
-    for(var key in keysDown) {
-        var value = Number(key);
-        switch(value) {
-            case 37: // [<-]
-                this.x_speed = -4;
-                break;
-            case 39: // [->]
-                this.x_speed = 4;
-                break;
-            case 32: // Jump
-            case 38: // up
-                this.jump();
-                break;
-        }
-        
-        console.log(key);
-    }
-
-    this.moveD();
-    
-    if(keysDown[32] == undefined && keysDown[39] == undefined) {
-        if(this.x_speed > 0) {
-            if(this.x_speed < 0.5) {
-                this.x_speed = 0;
-            } else {
-                this.x_speed -= 0.5;
-            }
-        } else {
-            if(this.x_speed > -0.5) {
-                this.x_speed = 0;
-            } else {
-                this.x_speed += 0.5;
-            }
-        }
-    }
-    if(this.isFalling) {
-        this.y_speed += 0.6;
-    }
-    
-    this.forceAbove(720);
-};
 
 Ball.prototype.move = function(dx, dy) {
     this.x_speed = dx;
@@ -157,10 +122,6 @@ Ball.prototype.forceRight = function(x) {
     }
 }
 
-var update = function() {
-    ball.update();
-};
-
 function Spike(x, y){
     this.x = x;
     this.y = y;
@@ -171,15 +132,20 @@ function Spike(x, y){
 Spike.prototype.getDot = function(idx) {
     switch(idx) {
         case 0:
-            return new Point(this.x + this.width / 2, this.y + this.height / 2);
+            // return new Point(this.x + this.width / 2, this.y + this.height / 2);
+            return {x: this.x + this.width / 2, y: this.y + this.height / 2};
         case 1:
-            return new Point(this.x, this.y);
+            // return new Point(this.x, this.y);
+            return {x: this.x, y: this.y};
         case 2:
-            return new Point(this.x + this.width, this.y);
+            // return new Point(this.x + this.width, this.y);
+            return {x: this.x + this.width, y: this.y};
         case 3:
-            return new Point(this.x + this.width, this.y + this.height);
+            // return new Point(this.x + this.width, this.y + this.height);
+            return {x: this.x + this.width, y: this.y + this.height};
         case 4:
-            return new Point(this.x, this.y + this.height);
+            // return new Point(this.x, this.y + this.height);
+            return {x: this.x, y: this.y + this.height};
     }
 }
 
@@ -196,7 +162,59 @@ Spike.prototype.moveX = function(dX) {
     this.x += dX;
 }
 
-var spike = new Spike(500, 690); // nice
+var spike = new Spike(600, 690); // nice
+
+Ball.prototype.update = function() {
+    if(this.collides(spike)) {
+        alert("You died!\nGet good");
+        this.reset();
+    }
+    
+    for(var key in keysDown) {
+        var value = Number(key);
+        switch(value) {
+            case 37: // [<-]
+                this.x_speed = -4;
+                break;
+            case 39: // [->]
+                this.x_speed = 4;
+                break;
+            case 32: // Jump
+            case 38: // up
+                this.jump();
+                break;
+        }
+        
+        console.log(key);
+    }
+
+    this.moveD();
+    
+    if(keysDown[32] == undefined && keysDown[39] == undefined) {
+        if(this.x_speed > 0) {
+            if(this.x_speed < 0.5) {
+                this.x_speed = 0;
+            } else {
+                this.x_speed -= 0.5;
+            }
+        } else {
+            if(this.x_speed > -0.5) {
+                this.x_speed = 0;
+            } else {
+                this.x_speed += 0.5;
+            }
+        }
+    }
+    if(this.isFalling) {
+        this.y_speed += 0.6;
+    }
+    
+    this.forceAbove(720);
+};
+
+var update = function() {
+    ball.update();
+};
 
 var render = function() {
     context.fillStyle = "#00bfff";
@@ -210,14 +228,37 @@ var render = function() {
     context.drawImage(testImage, 0, 0, 100, 100);
 };
 
+function Vector2D(x, y) {
+    this.x = x;
+    this.y = y;
+    this.magnitude = Math.sqrt(x * x + y * y);
+    if(this.magnitude == 1) {
+        this.unitVector = this;
+    } else {
+        this.unitVector = new Vector2D(x / this.magnitude, y / this.magnitude);
+    }
+}
+
+Vector2D.prototype.dotProduct = function(v) {
+    return this.x * v.x + this.y + v.y;
+}
+
 Ball.prototype.collides = function(box) {
     var center_box = box.getDot(0);
     
     var max = Number.NEGATIVE_INFINITY;
-    var box2circle = new Vector2d(this.x - center_box.x, this.y - center_box.y);
+    var box2circle = new Vector2D(this.x - center_box.x, this.y - center_box.y);
     var box2circle_normalised = box2circle.unitVector;
     
+    for(var i = 1;i<5;i++) {
+        var currentBoxCorner = box.getDot(i);
+        var v = new Vector2D(currentBoxCorner.x - center_box.x, 
+                             currentBoxCorner.y - center_box.y);
+        var currentProj = v.dotProduct(box2circle_normalised);
+        
+        if(max < currentProj) max = currentProj;
+    }
     
+    return !(box2circle.magnitude - max - this.radius > 0 && 
+             box2circle.magnitude > 0);
 }
-
-console.log()
