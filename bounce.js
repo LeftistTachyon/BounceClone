@@ -34,7 +34,7 @@ function Ball(x, y) {
     this.y = y;
     this.x_speed = 0;
     this.y_speed = 0;
-    this.radius = 30;
+    this.radius = 5;
     this.isFalling = false;
     this.reset = function() {
         this.x = x;
@@ -53,7 +53,7 @@ Ball.prototype.render = function() {
     context.fill();
 };
 
-var ball = new Ball(200, 720);
+var ball = new Ball(200, 745);
 
 var testImage = getImage("gsycoy jeyo.jfif");
 
@@ -155,6 +155,7 @@ Spike.prototype.render = function() {
     context.beginPath();
     context.fillStyle = "#FFEE00";
     context.arc(this.x + 10, this.y + 10, this.width/2, Math.PI * 2, false);
+    context.closePath();
     context.fill();
 }
 
@@ -163,6 +164,10 @@ Spike.prototype.moveX = function(dX) {
 }
 
 var spike = new Spike(600, 690); // nice
+
+for(var i = 0;i<=4;i++) {
+    console.log(spike.getDot(i));
+}
 
 Ball.prototype.update = function() {
     if(this.collides(spike)) {
@@ -209,7 +214,7 @@ Ball.prototype.update = function() {
         this.y_speed += 0.6;
     }
     
-    this.forceAbove(720);
+    this.forceAbove(745);
 };
 
 var update = function() {
@@ -244,21 +249,21 @@ Vector2D.prototype.dotProduct = function(v) {
 }
 
 Ball.prototype.collides = function(box) {
-    var center_box = box.getDot(0);
+    var centerBox = box.getDot(0);
     
     var max = Number.NEGATIVE_INFINITY;
-    var box2circle = new Vector2D(this.x - center_box.x, this.y - center_box.y);
+    var box2circle = new Vector2D(this.x - centerBox.x, this.y - centerBox.y);
     var box2circle_normalised = box2circle.unitVector;
     
-    for(var i = 1;i<5;i++) {
+    for(var i = 1;i<=4;i++) {
         var currentBoxCorner = box.getDot(i);
-        var v = new Vector2D(currentBoxCorner.x - center_box.x, 
-                             currentBoxCorner.y - center_box.y);
+        var v = new Vector2D(currentBoxCorner.x - centerBox.x, 
+                             currentBoxCorner.y - centerBox.y);
         var currentProj = v.dotProduct(box2circle_normalised);
         
         if(max < currentProj) max = currentProj;
     }
     
-    return !(box2circle.magnitude - max - this.radius > 0 && 
-             box2circle.magnitude > 0);
+    return box2circle.magnitude - max - this.radius <= 0 || 
+             box2circle.magnitude <= 0;
 }
