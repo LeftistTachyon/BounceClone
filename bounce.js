@@ -33,13 +33,24 @@ window.onload = function() {
     animate(step);
 };
 
+var keysDown = {};
+
+window.addEventListener("keydown", function(event) {
+    let key = event.keyCode;
+    console.log(key);
+    if(!ball.isFalling || (key != 32 && key != 38))
+        keysDown[key] = true;
+});
+
+window.addEventListener("keyup", function(event) {
+    delete keysDown[event.keyCode];
+});
+
 var step = function() {
     update();
     render();
     animate(step);
 };
-
-var keysDown = {};
 
 function Ball(x, y) {
     this.x = x;
@@ -91,29 +102,6 @@ Ring.prototype.render = function() {
 var ball = new Ball(200, 720);
 
 var ring = new Ring(400, 710);
-
-var render = function() {
-    context.fillStyle = "#A9A9A9";
-    context.fillRect(0, 0, width, height);
-    context.fillStyle = "#800000";
-    context.fillRect(0,750,width,height-120);
-    context.fillRect(0,0,width,height-400);
-    
-    ball.render();
-    
-    ring.render();
-};
-
-var keysDown = {};
-window.addEventListener("keydown", function(event) {
-    let key = event.keyCode;
-    if(!ball.isFalling || (key != 32 && key != 38))
-        keysDown[key] = true;
-});
-
-window.addEventListener("keyup", function(event) {
-    delete keysDown[event.keyCode];
-});
 
 Ball.prototype.jump = function() {
     if(!this.isFalling) {
@@ -275,14 +263,23 @@ var update = function() {
     ball.update();
 };
 
-var render = function() {
-    context.fillStyle = "#00bfff";
-    context.fillRect(0, 0, width, height);
-    context.fillStyle = "#800000";
-    context.fillRect(0,750,width,height-120);
+var renderLevel = function(level, screen) {
+    switch(level) {
+        case 0:
+            switch(screen) {
+                case 0:
+                    context.fillStyle = "#00bfff";
+                    context.fillRect(0, 0, width, height);
+                    context.fillStyle = "#800000";
+                    context.fillRect(0, 750, width, height - 120);
+                    context.fillRect(0, 0, width, height - 400);
+            }
+    }
+}
 
+var render = function() {
+    renderLevel(0, 0);
+    
     ball.render();
     spike.render();
-    
-    context.drawImage(testImage, 0, 0, 100, 100);
 };
