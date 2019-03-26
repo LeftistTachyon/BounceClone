@@ -37,26 +37,42 @@ function Ball(x, y) {
 }
 
 Ball.prototype.render = function() {
+    context.fillStyle = "#FF0000";
     context.beginPath();
     context.arc(this.x, this.y, this.radius, 2 * Math.PI, false);
-    context.fillStyle = "#FF0000";
+    context.closePath();
     context.fill();
 };
 
+function Ring(x, y) {
+    this.x = x;
+    this.y = y;
+    this.radiusX = 10;
+    this.radiusY = 40;
+}
+
+Ring.prototype.render = function() {
+    context.fillStyle = "#FFD700";
+    context.beginPath();
+    context.ellipse(this.x, this.y, this.radiusX, this.radiusY,  2 * Math.PI, 0, 2 * Math.PI);
+    context.closePath();
+    context.fill();
+}
+
 var ball = new Ball(200, 720);
 
-var testImage = getImage("Spike.png");
+var ring = new Ring(400, 710);
 
 var render = function() {
-    context.fillStyle = "#00bfff";
+    context.fillStyle = "#A9A9A9";
     context.fillRect(0, 0, width, height);
     context.fillStyle = "#800000";
     context.fillRect(0,750,width,height-120);
-    context.fillRect(0,0,width,height-300);
-
+    context.fillRect(0,0,width,height-400);
+    
     ball.render();
-
-    context.drawImage(testImage, 500, 665, 100, 100);
+    
+    ring.render();
 };
 
 var keysDown = {};
@@ -114,6 +130,8 @@ Ball.prototype.update = function() {
     }
     
     this.forceAbove(720);
+    
+    this.forceBelow(430);
 };
 
 Ball.prototype.move = function(dx, dy) {
@@ -146,7 +164,3 @@ Ball.prototype.forceBelow = function(y) {
 var update = function() {
     ball.update();
 };
-
-
-
-
