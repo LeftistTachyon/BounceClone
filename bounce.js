@@ -1,3 +1,15 @@
+function Trig() {}
+
+Trig.prototype.sec = function(angle) {
+    return 1/Math.cos(angle);
+}
+
+Trig.prototype.csc = function(angle) {
+    return 1/Math.sin(angle);
+}
+
+var trig = new Trig();
+
 var animate = window.requestAnimationFrame ||
     window.webkitRequestAnimationFrame ||
     window.mozRequestAnimationFrame ||
@@ -11,7 +23,7 @@ canvas.height = height;
 var context = canvas.getContext('2d');
 
 var getImage = function(location) {
-    var image = document.createElement("img");
+    let image = document.createElement("img");
     image.src = location;
     return image;
 }
@@ -34,7 +46,7 @@ function Ball(x, y) {
     this.y = y;
     this.x_speed = 0;
     this.y_speed = 0;
-    this.radius = 5;
+    this.radius = 30;
     this.isFalling = false;
     this.reset = function() {
         this.x = x;
@@ -46,19 +58,27 @@ function Ball(x, y) {
     }
 }
 
+Ball.prototype.getRadius = function(angle) {
+    return this.radius;
+}
+
+Ball.prototype.getCenter = function() {
+    return {x: this.x, y: this.y};
+}
+
 Ball.prototype.render = function() {
-    context.beginPath();
-    context.arc(this.x, this.y, this.radius, 2 * Math.PI, false);
     context.fillStyle = "#FF0000";
+    context.fillRect(this.x - this.radius, this.y - this.radius, 
+                     2 * this.radius, 2 * this.radius);
     context.fill();
 };
 
-var ball = new Ball(200, 745);
+var ball = new Ball(200, 720);
 
 var testImage = getImage("gsycoy jeyo.jfif");
 
 window.addEventListener("keydown", function(event) {
-    var key = event.keyCode;
+    let key = event.keyCode;
     if(!ball.isFalling || (key != 32 && key != 38))
         keysDown[key] = true;
 });
@@ -122,31 +142,13 @@ Ball.prototype.forceRight = function(x) {
     }
 }
 
+// 180 * n1 - atan(1/3) + 90
+
 function Spike(x, y){
     this.x = x;
     this.y = y;
     this.width = 20;
     this.height = 60;
-}
-
-Spike.prototype.getDot = function(idx) {
-    switch(idx) {
-        case 0:
-            // return new Point(this.x + this.width / 2, this.y + this.height / 2);
-            return {x: this.x + this.width / 2, y: this.y + this.height / 2};
-        case 1:
-            // return new Point(this.x, this.y);
-            return {x: this.x, y: this.y};
-        case 2:
-            // return new Point(this.x + this.width, this.y);
-            return {x: this.x + this.width, y: this.y};
-        case 3:
-            // return new Point(this.x + this.width, this.y + this.height);
-            return {x: this.x + this.width, y: this.y + this.height};
-        case 4:
-            // return new Point(this.x, this.y + this.height);
-            return {x: this.x, y: this.y + this.height};
-    }
 }
 
 Spike.prototype.render = function() {
@@ -165,14 +167,36 @@ Spike.prototype.moveX = function(dX) {
 
 var spike = new Spike(600, 690); // nice
 
-for(var i = 0;i<=4;i++) {
-    console.log(spike.getDot(i));
+function Vector2D(x, y) {
+    this.x = x;
+    this.y = y;
+    this.magnitude = Math.sqrt(x * x + y * y);
+    this.angle = Math.atan(this.y / this.x);
+    if(this.x < 0) {
+        this.angle += Math.PI / 2;
+    }
+    if(this.magnitude == 1) {
+        this.unitVector = this;
+    } else {
+        this.unitVector = new Vector2D(x / this.magnitude, y / this.magnitude);
+    }
+}
+
+Vector2D.prototype.dotProduct = function(v) {
+    return this.x * v.x + this.y + v.y;
+}
+
+var collides = function(bal, thing) {
+    return thing.x + thing.width > bal.x - bal.radius &&
+        thing.y + thing.height > bal.y - bal.radius &&
+        thing.x < bal.x + bal.radius &&
+        thing.y < bal.y + bal.radius;
 }
 
 Ball.prototype.update = function() {
-    if(this.collides(spike)) {
+    if(collides(ball, spike)) {
         alert("You died!\nGet good");
-        this.reset();
+        ball.reset();
     }
     
     for(var key in keysDown) {
@@ -214,7 +238,7 @@ Ball.prototype.update = function() {
         this.y_speed += 0.6;
     }
     
-    this.forceAbove(745);
+    this.forceAbove(720);
 };
 
 var update = function() {
@@ -232,38 +256,3 @@ var render = function() {
     
     context.drawImage(testImage, 0, 0, 100, 100);
 };
-
-function Vector2D(x, y) {
-    this.x = x;
-    this.y = y;
-    this.magnitude = Math.sqrt(x * x + y * y);
-    if(this.magnitude == 1) {
-        this.unitVector = this;
-    } else {
-        this.unitVector = new Vector2D(x / this.magnitude, y / this.magnitude);
-    }
-}
-
-Vector2D.prototype.dotProduct = function(v) {
-    return this.x * v.x + this.y + v.y;
-}
-
-Ball.prototype.collides = function(box) {
-    var centerBox = box.getDot(0);
-    
-    var max = Number.NEGATIVE_INFINITY;
-    var box2circle = new Vector2D(this.x - centerBox.x, this.y - centerBox.y);
-    var box2circle_normalised = box2circle.unitVector;
-    
-    for(var i = 1;i<=4;i++) {
-        var currentBoxCorner = box.getDot(i);
-        var v = new Vector2D(currentBoxCorner.x - centerBox.x, 
-                             currentBoxCorner.y - centerBox.y);
-        var currentProj = v.dotProduct(box2circle_normalised);
-        
-        if(max < currentProj) max = currentProj;
-    }
-    
-    return box2circle.magnitude - max - this.radius <= 0 || 
-             box2circle.magnitude <= 0;
-}
