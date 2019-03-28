@@ -52,6 +52,13 @@ var step = function() {
     animate(step);
 };
 
+var level = 0;
+var screen = 0;
+
+var collidables = {};
+
+collidables[0] = [new Spike(600, 690), new EndGoal(width - 30, height - 150)];
+
 function Ball(x, y) {
     this.x = x;
     this.y = y;
@@ -94,7 +101,8 @@ function Ring(x, y) {
 Ring.prototype.render = function() {
     context.fillStyle = "#FFD700";
     context.beginPath();
-    context.ellipse(this.x, this.y, this.radiusX, this.radiusY,  2 * Math.PI, 0, 2 * Math.PI);
+    context.ellipse(this.x, this.y, this.radiusX, this.radiusY,  
+                    2 * Math.PI, 0, 2 * Math.PI);
     context.closePath();
     context.fill();
 }
@@ -145,26 +153,46 @@ Ball.prototype.forceBelow = function(y) {
 }
 
 Ball.prototype.forceLeft = function(x) {
-    if(this.x > x) {
-        this.x = x;
+    if(this.x > x - this.radius) {
+        this.x = x - this.radius;
         this.x_speed = 0;
     }
 }
 
 Ball.prototype.forceRight = function(x) {
-    if(this.x < x) {
-        this.x = x;
+    if(this.x < x + this.radius) {
+        this.x = x + this.radius;
         this.x_speed = 0;
     }
 }
 
-// 180 * n1 - atan(1/3) + 90
+function EndGoal(x, y) {
+    this.x = x;
+    this.y = y;
+    this.width = 30;
+    this.height = 100;
+    this.onTouch = function() {
+        console.log("AAAAA");
+        alert("Yay! You completed the level! Onto level " + (level + 1));
+        level++;
+        ball.reset();
+    };
+}
+
+EndGoal.prototype.render = function() {
+    context.fillStyle = "#ffc744";
+    context.fillRect(this.x, this.y, this.width, this.height);
+}
 
 function Spike(x, y){
     this.x = x;
     this.y = y;
     this.width = 20;
     this.height = 60;
+    this.onTouch = function() {
+        alert("You died!\nGet good");
+        ball.reset();
+    };
 }
 
 Spike.prototype.render = function() {
@@ -181,27 +209,6 @@ Spike.prototype.moveX = function(dX) {
     this.x += dX;
 }
 
-var spike = new Spike(600, 690); // nice
-
-function Vector2D(x, y) {
-    this.x = x;
-    this.y = y;
-    this.magnitude = Math.sqrt(x * x + y * y);
-    this.angle = Math.atan(this.y / this.x);
-    if(this.x < 0) {
-        this.angle += Math.PI / 2;
-    }
-    if(this.magnitude == 1) {
-        this.unitVector = this;
-    } else {
-        this.unitVector = new Vector2D(x / this.magnitude, y / this.magnitude);
-    }
-}
-
-Vector2D.prototype.dotProduct = function(v) {
-    return this.x * v.x + this.y + v.y;
-}
-
 var collides = function(bal, thing) {
     return thing.x + thing.width > bal.x - bal.radius &&
         thing.y + thing.height > bal.y - bal.radius &&
@@ -209,11 +216,35 @@ var collides = function(bal, thing) {
         thing.y < bal.y + bal.radius;
 }
 
-Ball.prototype.update = function() {
-    if(collides(ball, spike)) {
-        alert("You died!\nGet good");
-        ball.reset();
+var collisionFor = function(level, screen) {
+    switch(level) {
+        case 0:
+            switch(screen) {
+                case 0:
+                    ball.forceRight(30);
+                    ball.forceAbove(720);
+                    ball.forceBelow(430);
+                    ball.forceLeft(width - 29);
+                    break;
+            }
+            break;
     }
+}
+
+var checkAllCollisions = function() {
+    let num = 10 * level + screen;
+    let collides_ = collidables[num];
+    
+    for(let i = 0;i<collides_.length;i++) {
+        let thing = collides_[i];
+        if(collides(ball, thing)) {
+            thing.onTouch();
+        }
+    }
+}
+
+Ball.prototype.update = function() {
+    checkAllCollisions();
     
     for(var key in keysDown) {
         var value = Number(key);
@@ -254,9 +285,7 @@ Ball.prototype.update = function() {
         this.y_speed += 0.6;
     }
     
-    this.forceAbove(720);
-    
-    this.forceBelow(430);
+    collisionFor(level, screen);
 };
 
 var update = function() {
@@ -273,13 +302,28 @@ var renderLevel = function(level, screen) {
                     context.fillStyle = "#800000";
                     context.fillRect(0, 750, width, height - 120);
                     context.fillRect(0, 0, width, height - 400);
+                    context.fillRect(0, 0, 30, height);
+                    context.fillRect(width - 30, 0, 30, height);
+                    break;
             }
+            break;
     }
+    
+    context.fillStyle = "#FFFFFF";
+    context.font = "30px Consolas";
+    context.fillText("Level " + level, 15, height - 15);
 }
 
 var render = function() {
-    renderLevel(0, 0);
+    renderLevel(level, screen);
     
     ball.render();
-    spike.render();
+    
+    let num = 10 * level + screen;
+    let collides_ = collidables[num];
+    
+    for (let i = 0;i<collides_.length;i++) {
+        let thing = collides_[i];
+        thing.render();
+    }
 };
