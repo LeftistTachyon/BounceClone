@@ -210,10 +210,10 @@ Spike.prototype.moveX = function(dX) {
 }
 
 var collides = function(bal, thing) {
-    return thing.x + thing.width > bal.x - bal.radius &&
-        thing.y + thing.height > bal.y - bal.radius &&
-        thing.x < bal.x + bal.radius &&
-        thing.y < bal.y + bal.radius;
+    return thing.x + thing.width >= bal.x - bal.radius &&
+        thing.y + thing.height >= bal.y - bal.radius &&
+        thing.x <= bal.x + bal.radius &&
+        thing.y <= bal.y + bal.radius;
 }
 
 var collisionFor = function(level, screen) {
@@ -224,7 +224,7 @@ var collisionFor = function(level, screen) {
                     ball.forceRight(30);
                     ball.forceAbove(720);
                     ball.forceBelow(430);
-                    ball.forceLeft(width - 29);
+                    ball.forceLeft(width - 30);
                     break;
             }
             break;
