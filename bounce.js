@@ -58,6 +58,8 @@ var screen = 0;
 var collidables = {};
 
 collidables[0] = [new Spike(600, 690), new EndGoal(width - 30, height - 150)];
+collidables[10] = [new Spike(390, 690), new EndGoal(width - 30, height - 150), 
+                   new Spike(690, 690), new Ring(543, 700)];
 
 function Ball(x, y) {
     this.x = x;
@@ -91,25 +93,37 @@ Ball.prototype.render = function() {
     context.fill();
 };
 
+var ringsTouched = 0;
+
 function Ring(x, y) {
-    this.x = x;
-    this.y = y;
+    this.collected = false;
     this.radiusX = 10;
     this.radiusY = 40;
+    this.x = x - this.radiusX;
+    this.y = y - this.radiusY;
+    this.width = this.radiusX * 2;
+    this.height = this.radiusY * 2;
+    this.onTouch = function() {
+        if(!this.collected) {
+            ringsTouched++;
+            this.collected = true;
+        }
+    };
 }
 
 Ring.prototype.render = function() {
-    context.fillStyle = "#FFD700";
-    context.beginPath();
-    context.ellipse(this.x, this.y, this.radiusX, this.radiusY,  
-                    2 * Math.PI, 0, 2 * Math.PI);
-    context.closePath();
-    context.fill();
+    if(!this.collected) {
+        context.fillStyle = "#FFD700";
+        context.beginPath();
+        context.ellipse(this.x + this.radiusX, this.y + this.radiusY, 
+                        this.radiusX, this.radiusY,  
+                        2 * Math.PI, 0, 2 * Math.PI);
+        context.closePath();
+        context.fill();
+    }
 }
 
 var ball = new Ball(200, 720);
-
-var ring = new Ring(400, 710);
 
 Ball.prototype.jump = function() {
     if(!this.isFalling) {
@@ -167,20 +181,31 @@ Ball.prototype.forceRight = function(x) {
 }
 
 function EndGoal(x, y) {
+    this.levelRequirements = {0: 0, 1: 1};
     this.x = x;
     this.y = y;
     this.width = 30;
     this.height = 100;
     this.onTouch = function() {
-        console.log("AAAAA");
-        alert("Yay! You completed the level! Onto level " + (level + 1));
-        level++;
-        ball.reset();
+        if(this.meetsRequirements()) {
+            level++;
+            alert("Yay! You completed the level! Onto level " + level);
+            ball.reset();
+        }
     };
 }
 
+EndGoal.prototype.meetsRequirements = function() {
+    return this.levelRequirements[level] == ringsTouched;
+}
+
 EndGoal.prototype.render = function() {
-    context.fillStyle = "#ffc744";
+    if(this.meetsRequirements()) {
+        context.fillStyle = "#17d80d";
+    } else {
+        context.fillStyle = "#d80d0d";
+    }
+    
     context.fillRect(this.x, this.y, this.width, this.height);
 }
 
@@ -219,14 +244,11 @@ var collides = function(bal, thing) {
 var collisionFor = function(level, screen) {
     switch(level) {
         case 0:
-            switch(screen) {
-                case 0:
-                    ball.forceRight(30);
-                    ball.forceAbove(720);
-                    ball.forceBelow(430);
-                    ball.forceLeft(width - 30);
-                    break;
-            }
+        case 1:
+            ball.forceRight(30);
+            ball.forceAbove(720);
+            ball.forceBelow(430);
+            ball.forceLeft(width - 30);
             break;
     }
 }
@@ -295,17 +317,14 @@ var update = function() {
 var renderLevel = function(level, screen) {
     switch(level) {
         case 0:
-            switch(screen) {
-                case 0:
-                    context.fillStyle = "#00bfff";
-                    context.fillRect(0, 0, width, height);
-                    context.fillStyle = "#800000";
-                    context.fillRect(0, 750, width, height - 120);
-                    context.fillRect(0, 0, width, height - 400);
-                    context.fillRect(0, 0, 30, height);
-                    context.fillRect(width - 30, 0, 30, height);
-                    break;
-            }
+        case 1:
+            context.fillStyle = "#00bfff";
+            context.fillRect(0, 0, width, height);
+            context.fillStyle = "#800000";
+            context.fillRect(0, 750, width, height - 120);
+            context.fillRect(0, 0, width, height - 400);
+            context.fillRect(0, 0, 30, height);
+            context.fillRect(width - 30, 0, 30, height);
             break;
     }
     
