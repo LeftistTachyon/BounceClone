@@ -22,12 +22,6 @@ canvas.width = width;
 canvas.height = height;
 var context = canvas.getContext('2d');
 
-var getImage = function(location) {
-    let image = document.createElement("img");
-    image.src = location;
-    return image;
-}
-
 window.onload = function() {
     document.body.appendChild(canvas);
     animate(step);
@@ -91,18 +85,6 @@ Ring.prototype.render = function() {
 var ball = new Ball(200, 720);
 
 var ring = new Ring(400, 710);
-
-var render = function() {
-    context.fillStyle = "#A9A9A9";
-    context.fillRect(0, 0, width, height);
-    context.fillStyle = "#800000";
-    context.fillRect(0,750,width,height-120);
-    context.fillRect(0,0,width,height-400);
-    
-    ball.render();
-    
-    ring.render();
-};
 
 var keysDown = {};
 window.addEventListener("keydown", function(event) {
@@ -268,7 +250,7 @@ Ball.prototype.update = function() {
     
     this.forceAbove(720);
     
-    this.forceBelow(430);
+    this.forceBelow(500);
 };
 
 var update = function() {
@@ -280,9 +262,11 @@ var render = function() {
     context.fillRect(0, 0, width, height);
     context.fillStyle = "#800000";
     context.fillRect(0,750,width,height-120);
+    context.fillRect(0,0,width,height-400);
 
     ball.render();
-    spike.render();
     
-    context.drawImage(testImage, 0, 0, 100, 100);
+    ring.render();
+    
+    spike.render();
 };
