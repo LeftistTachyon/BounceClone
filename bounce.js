@@ -57,9 +57,9 @@ var screen = 0;
 
 var collidables = {};
 
-collidables[0] = [new Spike(600, 690), new EndGoal(width - 30, height - 150)];
-collidables[10] = [new Spike(390, 690), new EndGoal(width - 30, height - 150), 
-                   new Spike(690, 690), new Ring(543, 700)];
+collidables[0] = [new Spike(600, 690, 0), new EndGoal(width - 30, height - 150)];
+collidables[10] = [new Spike(390, 690, 0), new EndGoal(width - 30, height - 150), 
+                   new Spike(690, 690, 0), new Ring(543, 700)];
 
 function Ball(x, y) {
     this.x = x;
@@ -92,6 +92,39 @@ Ball.prototype.render = function() {
                      2 * this.radius, 2 * this.radius);
     context.fill();
 };
+
+function Platform(x, y, width, height) {
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+    this.onTouch = function() {
+        /*if(this.x + this.width > ball.x - ball.radius) {
+            // at least |this|ball|
+            
+        }
+        if(this.y + this.height > ball.y - ball.radius) {
+            // at least ball
+            //          this
+            
+        }
+        if(this.x < ball.x + ball.radius) {
+            // at least |ball|this|
+            
+        }
+        if(this.y < ball.y + ball.radius) {
+            // at least this
+            //          ball
+            
+        }*/
+        if(this.x + this.width >= ball.x - ball.radius && 
+           this.x <= ball.x + ball.radius) {
+            if(ball.y - ball.radius < this.y + this.height && ball.y + ball.radius > this.) {
+                
+            }
+        }
+    };
+}
 
 var ringsTouched = 0;
 
@@ -127,7 +160,15 @@ var ball = new Ball(200, 720);
 
 Ball.prototype.jump = function() {
     if(!this.isFalling) {
-        this.y_speed = -25;
+        switch(level) {
+            case 0:
+            case 1:
+                this.y_speed = -25;
+                break;
+            case 2:
+                this.y_speed = -15;
+                break;
+        }
         this.isFalling = true;
     }
 }
@@ -209,25 +250,84 @@ EndGoal.prototype.render = function() {
     context.fillRect(this.x, this.y, this.width, this.height);
 }
 
-function Spike(x, y){
+/*
+up: 0
+right: 1
+down: 2
+left: 3
+*/
+function Spike(x, y, orientation){
+    this.orientation = orientation;
     this.x = x;
     this.y = y;
-    this.width = 20;
-    this.height = 60;
+    if(orientation % 2 == 0) {
+        this.width = 20;
+        this.height = 60;
+        this.fRadius = this.width / 2;
+    } else {
+        this.width = 60;
+        this.height = 20;
+        this.fRadius = this.height / 2;
+    }
     this.onTouch = function() {
         alert("You died!\nGet good");
         ball.reset();
+        let coll = collidables[10 * level + screen];
+        for(let i = 0;i<coll.length;i++) {
+            let col = coll[i];
+            if(col instanceof Ring) {
+                col.collected = false;
+            }
+        }
+        ringsTouched = 0;
     };
 }
 
 Spike.prototype.render = function() {
-    context.fillStyle = "#91612B";
-    context.fillRect(this.x, this.y + 10, this.width, this.height - 10);
-    context.beginPath();
-    context.fillStyle = "#FFEE00";
-    context.arc(this.x + 10, this.y + 10, this.width/2, Math.PI * 2, false);
-    context.closePath();
-    context.fill();
+    switch(this.orientation) {
+        case 0:
+            context.fillStyle = "#91612B";
+            context.fillRect(this.x, this.y + this.fRadius, 
+                             this.width, this.height - this.fRadius);
+            context.beginPath();
+            context.fillStyle = "#FFEE00";
+            context.arc(this.x + this.fRadius, this.y + this.fRadius, 
+                        this.fRadius, Math.PI * 2, false);
+            context.closePath();
+            context.fill();
+            break;
+        case 1:
+            context.fillStyle = "#91612B";
+            context.fillRect(this.x, this.y, this.width - this.fRadius, this.height);
+            context.beginPath();
+            context.fillStyle = "#FFEE00";
+            context.arc(this.x + this.width - this.fRadius, this.y + this.fRadius, 
+                        this.fRadius, Math.PI * 2, false);
+            context.closePath();
+            context.fill();
+            break;
+        case 2:
+            context.fillStyle = "#91612B";
+            context.fillRect(this.x, this.y, this.width, this.height - this.fRadius);
+            context.beginPath();
+            context.fillStyle = "#FFEE00";
+            context.arc(this.x + this.fRadius, this.y + this.height - this.fRadius, 
+                        this.fRadius, Math.PI * 2, false);
+            context.closePath();
+            context.fill();
+            break;
+        case 3:
+            context.fillStyle = "#91612B";
+            context.fillRect(this.x + this.fRadius, this.y, 
+                             this.width - this.fRadius, this.height);
+            context.beginPath();
+            context.fillStyle = "#FFEE00";
+            context.arc(this.x + this.fRadius, this.y + this.fRadius, 
+                        this.fRadius, Math.PI * 2, false);
+            context.closePath();
+            context.fill();
+            break;
+    }
 }
 
 Spike.prototype.moveX = function(dX) {
