@@ -37,7 +37,6 @@ var keysDown = {};
 
 window.addEventListener("keydown", function(event) {
     let key = event.keyCode;
-    console.log(key);
     if(!ball.isFalling || (key != 32 && key != 38))
         keysDown[key] = true;
 });
@@ -52,14 +51,20 @@ var step = function() {
     animate(step);
 };
 
+var backgrounds = {0: "#00bfff", 1: "#00bfff"};
+var foregrounds = {0: "#800000", 1: "#800000"};
+
 var level = 0;
 var screen = 0;
 
 var collidables = {};
 
-collidables[0] = [new Spike(600, 690, 0), new EndGoal(width - 30, height - 150)];
+collidables[0] = [new Spike(600, 690, 0), new EndGoal(width - 30, height - 150), 
+                  new Platform(50, height - 200, 50, 50), 
+                  new Platform(0, 750, width, height - 120)];
 collidables[10] = [new Spike(390, 690, 0), new EndGoal(width - 30, height - 150), 
-                   new Spike(690, 690, 0), new Ring(543, 700)];
+                   new Spike(690, 690, 0), new Ring(543, 700),
+				   new Platform(0, 750, width, height - 120)];
 
 function Ball(x, y) {
     this.x = x;
@@ -99,32 +104,28 @@ function Platform(x, y, width, height) {
     this.width = width;
     this.height = height;
     this.onTouch = function() {
-        /*if(this.x + this.width > ball.x - ball.radius) {
-            // at least |this|ball|
-            
-        }
-        if(this.y + this.height > ball.y - ball.radius) {
-            // at least ball
-            //          this
-            
-        }
-        if(this.x < ball.x + ball.radius) {
-            // at least |ball|this|
-            
-        }
-        if(this.y < ball.y + ball.radius) {
-            // at least this
-            //          ball
-            
-        }*/
-        if(this.x + this.width >= ball.x - ball.radius && 
-           this.x <= ball.x + ball.radius) {
-            if(ball.y - ball.radius < this.y + this.height && ball.y + ball.radius > this.) {
-                
-            }
+        let temp = collideSide(ball, this);
+        switch(temp) {
+            case "t":
+                ball.forceAbove(this.y - ball.radius);
+                break;
+            case "b":
+                ball.forceBelow(this.y + this.height + ball.radius + 1);
+                break;
+            case "l":
+                ball.forceLeft(this.x);
+                break;
+            case "r":
+                ball.forceRight(this.x + this.width);
+                break;
         }
     };
 }
+
+Platform.prototype.render = function() {
+    context.fillStyle = foregrounds[level];
+    context.fillRect(this.x, this.y, this.width, this.height);
+};
 
 var ringsTouched = 0;
 
@@ -339,7 +340,38 @@ var collides = function(bal, thing) {
         thing.y + thing.height >= bal.y - bal.radius &&
         thing.x <= bal.x + bal.radius &&
         thing.y <= bal.y + bal.radius;
-}
+};
+
+var collideSide = function(bal, thing) {
+    let vX = bal.x - (thing.x + (thing.width / 2)),
+        vY = bal.y - (thing.y + (thing.height / 2)),
+        
+        hWidths = bal.radius + (thing.width / 2),
+        hHeights = bal.radius + (thing.height / 2),
+        colDir = null;
+ 
+
+    if (collides(bal, thing)) {         
+      
+        let oX = hWidths - Math.abs(vX),
+            oY = hHeights - Math.abs(vY);
+        if (oX >= oY) {
+            if (vY < 0) {
+                colDir = "t";
+            } else {
+                colDir = "b";
+            }
+        } else {
+            if (vX < 0) {
+                colDir = "l";
+            } else {
+                colDir = "r";
+            }
+        }
+    }
+    
+    return colDir;
+};
 
 var collisionFor = function(level, screen) {
     switch(level) {
@@ -357,17 +389,22 @@ var checkAllCollisions = function() {
     let num = 10 * level + screen;
     let collides_ = collidables[num];
     
+    let shouldFall = true;
+    
     for(let i = 0;i<collides_.length;i++) {
         let thing = collides_[i];
         if(collides(ball, thing)) {
+			if(thing instanceof Platform) {
+                shouldFall = collideSide(ball, thing) != "t";
+            }
             thing.onTouch();
         }
     }
+    
+    ball.isFalling = shouldFall;
 }
 
 Ball.prototype.update = function() {
-    checkAllCollisions();
-    
     for(var key in keysDown) {
         var value = Number(key);
         switch(value) {
@@ -407,6 +444,7 @@ Ball.prototype.update = function() {
         this.y_speed += 0.6;
     }
     
+    checkAllCollisions();
     collisionFor(level, screen);
 };
 
@@ -415,12 +453,12 @@ var update = function() {
 };
 
 var renderLevel = function(level, screen) {
+    context.fillStyle = backgrounds[level];
+    context.fillRect(0, 0, width, height);
+    context.fillStyle = foregrounds[level];
     switch(level) {
         case 0:
         case 1:
-            context.fillStyle = "#00bfff";
-            context.fillRect(0, 0, width, height);
-            context.fillStyle = "#800000";
             context.fillRect(0, 750, width, height - 120);
             context.fillRect(0, 0, width, height - 400);
             context.fillRect(0, 0, 30, height);
