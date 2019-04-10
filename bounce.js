@@ -250,7 +250,7 @@ Ball.prototype.update = function() {
     
     this.forceAbove(720);
     
-    this.forceBelow(500);
+    this.forceBelow(530);
 };
 
 var update = function() {
