@@ -182,7 +182,6 @@ Ring.prototype.render = function() {
         context.fill();
     }
 }
->>>>>>> 39c5129e616ae4d9a52601b02a40b47ba89bbd51
 
 var ball = new Ball();
 
@@ -482,7 +481,6 @@ Ball.prototype.update = function() {
 =======
     checkAllCollisions();
     collisionFor(level, screen);
->>>>>>> 39c5129e616ae4d9a52601b02a40b47ba89bbd51
 };
 
 var update = function() {
@@ -518,7 +516,6 @@ var renderLevel = function(level, screen) {
     context.font = "20px Consolas";
     context.fillText("Level " + level, 7, height - 7);
 }
->>>>>>> 39c5129e616ae4d9a52601b02a40b47ba89bbd51
 
 var render = function() {
     renderLevel(level, screen);
@@ -537,5 +534,4 @@ var render = function() {
         let thing = collides_[i];
         thing.render();
     }
->>>>>>> 39c5129e616ae4d9a52601b02a40b47ba89bbd51
 };
