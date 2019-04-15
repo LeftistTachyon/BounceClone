@@ -22,6 +22,12 @@ canvas.width = width;
 canvas.height = height;
 var context = canvas.getContext('2d');
 
+var getImage = function(location) {
+    let image = document.createElement("img");
+    image.src = location;
+    return image;
+}
+
 window.onload = function() {
     document.body.appendChild(canvas);
     animate(step);
@@ -147,14 +153,6 @@ Platform.prototype.render = function() {
 
 var ringsTouched = 0;
 
-<<<<<<< HEAD
-var keysDown = {};
-window.addEventListener("keydown", function(event) {
-    let key = event.keyCode;
-    if(!ball.isFalling || (key != 32 && key != 38))
-        keysDown[key] = true;
-});
-=======
 function Ring(x, y) {
     this.collected = false;
     this.radiusX = 6.5;
@@ -474,11 +472,6 @@ Ball.prototype.update = function() {
         this.y_speed += 0.6;
     }
     
-<<<<<<< HEAD
-    this.forceAbove(720);
-    
-    this.forceBelow(530);
-=======
     checkAllCollisions();
     collisionFor(level, screen);
 };
@@ -490,11 +483,6 @@ var update = function() {
 var renderLevel = function(level, screen) {
     context.fillStyle = backgrounds[level];
     context.fillRect(0, 0, width, height);
-<<<<<<< HEAD
-    context.fillStyle = "#800000";
-    context.fillRect(0,750,width,height-120);
-    context.fillRect(0,0,width,height-400);
-=======
     context.fillStyle = foregrounds[level];
     switch(level) {
         case 0:
@@ -522,11 +510,6 @@ var render = function() {
     
     ball.render();
     
-<<<<<<< HEAD
-    ring.render();
-    
-    spike.render();
-=======
     let num = 10 * level + screen;
     let collides_ = collidables[num];
     
