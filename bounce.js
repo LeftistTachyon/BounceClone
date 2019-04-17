@@ -51,13 +51,16 @@ var step = function() {
     animate(step);
 };
 
+
+
 var backgrounds = {0: "#00bfff", 1: "#00bfff", 2:"#000000"};
 var foregrounds = {0: "#800000", 1: "#800000", 2:"#585858"};
 var starting = {0: {x: 200, y: 670}, 1: {x: 200, y: 670}, 
                 2: {x: 81, y: height - 50}};
 
-var level = 2;
+var level = 0;
 var screen = 0;
+
 
 var collidables = {};
 
@@ -502,7 +505,7 @@ var renderLevel = function(level, screen) {
     
     context.fillStyle = "#FFFFFF";
     context.font = "20px Consolas";
-    context.fillText("Level " + level, 7, height - 7);
+    context.fillText("Level " + level, 7, height - 7); 
 }
 
 var render = function() {
