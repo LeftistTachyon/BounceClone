@@ -28,6 +28,10 @@ var getImage = function(location) {
     return image;
 }
 
+var skyline = new getImage("skyline.png");
+var title = new getImage("Title.png");
+var instructOne = new getImage("Instruction 1.png");
+
 window.onload = function() {
     document.body.appendChild(canvas);
     animate(step);
@@ -55,7 +59,7 @@ var step = function() {
 
 var backgrounds = {0: "#00bfff", 1: "#00bfff", 2:"#000000"};
 var foregrounds = {0: "#800000", 1: "#800000", 2:"#585858"};
-var starting = {0: {x: 200, y: 670}, 1: {x: 200, y: 670}, 
+var starting = {0: {x: 600, y: 670}, 1: {x: 200, y: 670}, 
                 2: {x: 81, y: height - 50}};
 
 var level = 0;
@@ -64,9 +68,16 @@ var screen = 0;
 
 var collidables = {};
 
-collidables[0] = [new Spike(600, 656, 0), new EndGoal(width - 30, height - 150), 
-                  new Platform(50, height - 200, 50, 50), 
-                  new Platform(0, 700, width, height - 120)];
+collidables[0] =  [new EndGoal(width - 30, height - 150),  
+                   new Platform(0, 700, width, height - 120),
+                   new Platform(width-30, 300, 100, 300),
+                   new Building(0, 423, 49, 277),
+                   new Building(58, 311, 52, 389),
+                   new Building(118, 495, 52, 205),
+                   new Building(177, 384, 52, 316),
+                   new Building(236, 594, 105, 106),
+                   new Building(347, 478, 53, 222),
+                   new Building(409, 206, 52, 494)];
 collidables[10] = [new Spike(390, 656, 0), new EndGoal(width - 30, height - 150), 
                    new Spike(690, 656, 0), new Ring(543, 650),
 				   new Platform(0, 700, width, height - 120)];
@@ -152,6 +163,34 @@ function Platform(x, y, width, height) {
 Platform.prototype.render = function() {
     context.fillStyle = foregrounds[level];
     context.fillRect(this.x, this.y, this.width, this.height);
+};
+
+function Building(x, y, width, height) {
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+    this.onTouch = function() {
+        let temp = collideSide(ball, this);
+        switch(temp) {
+            case "t":
+                ball.forceAbove(this.y - ball.radius);
+                break;
+            case "b":
+                ball.forceBelow(this.y + this.height + ball.radius + 1);
+                break;
+            case "l":
+                ball.forceLeft(this.x);
+                break;
+            case "r":
+                ball.forceRight(this.x + this.width);
+                break;
+        }
+    };
+}
+
+Building.prototype.render = function() {
+    
 };
 
 var ringsTouched = 0;
@@ -258,7 +297,9 @@ function EndGoal(x, y) {
     this.onTouch = function() {
         if(this.meetsRequirements()) {
             level++;
-            alert("Yay! You completed the level! Onto level " + level);
+            if(level != 1){
+                alert("Yay! You completed the level! Onto level " + level);
+            }
             ball.reset();
         }
     };
@@ -403,6 +444,9 @@ var collideSide = function(bal, thing) {
 var collisionFor = function(level, screen) {
     switch(level) {
         case 0:
+            ball.forceRight(0);
+            ball.forceLeft(width);
+            break;
         case 1:
             ball.forceRight(30);
             ball.forceBelow(380);
@@ -425,7 +469,7 @@ var checkAllCollisions = function() {
     for(let i = 0;i<collides_.length;i++) {
         let thing = collides_[i];
         if(collides(ball, thing)) {
-			if(thing instanceof Platform) {
+			if(thing instanceof Platform || thing instanceof Building) {
                 shouldFall = collideSide(ball, thing) != "t";
             }
             thing.onTouch();
@@ -481,6 +525,12 @@ Ball.prototype.update = function() {
 
 var update = function() {
     ball.update();
+    
+    switch(level){
+        case 0:
+            startMusic.play();
+            break;
+    }
 };
 
 var renderLevel = function(level, screen) {
@@ -489,6 +539,10 @@ var renderLevel = function(level, screen) {
     context.fillStyle = foregrounds[level];
     switch(level) {
         case 0:
+            context.drawImage(skyline, 0, 200, 500, 500);
+            context.drawImage(title, 500, 100 , 500, 100);
+            context.drawImage(instructOne, 750, 550, 200, 100);
+            break;
         case 1:
             context.fillRect(0, 750, width, height - 120);
             context.fillRect(0, 0, width, height - 400);
@@ -521,3 +575,8 @@ var render = function() {
         thing.render();
     }
 };
+
+var startMusic = new Audio();
+startMusic.src = "apples.mp3";
+
+
