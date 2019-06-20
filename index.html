@@ -1,5 +1,16 @@
 <!DOCTYPE html>
 <html>  
+    <script type="text/javascript">
+        if (document.addEventListener) { // IE >= 9; other browsers
+            document.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+            }, false);
+        } else { // IE < 9
+            document.attachEvent('oncontextmenu', function() {
+                window.event.returnValue = false;
+            });
+        }
+    </script>
     <head>
         <title>Bounce!</title>
         <link rel="stylesheet" href="style.css">
