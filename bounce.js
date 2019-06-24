@@ -877,7 +877,7 @@ var checkAllCollisions = function() {
     for(let i = 0;i<collides_.length;i++) {
         let thing = collides_[i];
         if(collides(ball, thing)) {
-			if(thing instanceof Platform || thing instanceof Building || (thing instanceof Kaizo && thing.touched)) {
+			if(shouldFall && (thing instanceof Platform || thing instanceof Building || (thing instanceof Kaizo && thing.touched))) {
                 shouldFall = collideSide(ball, thing) != "t";
             }
             thing.onTouch();
