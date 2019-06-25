@@ -65,12 +65,11 @@ var foregrounds = {0: "#800000", 1: "#800000", 2: "#585858", 3: "#585858",
                    4: "#6113af", 5: "#6113af", 6: "#000000", 7: "#22B14C"};
 var starting = {0: {x: 600, y: 670}, 1: {x: 200, y: 670},
                 2: {x: 81, y: height - 50}, 3: {x: 81, y: 694}, 4: {x: 83, y: 700},
-                5: {x: 89, y: 698}, 6: {x: 72, y: 700}, 
-                7: {x: 63, y: -100}};
+                5: {x: 89, y: 698}, 6: {x: 72, y: 700}, 7: {x: 63, y: -100}};
 
-var level = 0;
+var level = 6; // 0
 
-var screen = 0;
+var screen = 1; // 0
 
 var invisible = false;
 var impossible = false;
@@ -206,7 +205,6 @@ collidables[60] = [new Spike(963, 96, 0), new Spike(889, 221, 0),
 				   new Spike(963, 586, 0), 
 				   new Platform(0, 0, width, 21), new Platform(0, 21, 21, height), 
 				   new Platform(965, 0, 35, 630), 
-				   new Portal(width - 30, 630, 1, {x: 0, y: 0}, true), 
 				   new Platform(21, 520, 406, 40), new Platform(90, 221, 341, 50), 
 				   new Platform(230, 95, 31, 126), new Platform(546, 226, 50, 504),
 				   new Platform(742, 21, 20, 447), new Platform(880, 122, 21, 608),
@@ -267,8 +265,14 @@ collidables[60] = [new Spike(963, 96, 0), new Spike(889, 221, 0),
 				   new Platform(0, height - 20, width, 20), new Spike(866, 382, 0),
 				   new Platform(762, 379, 8, 10), new Spike(762, 230, 0),
 				   new Platform(872, 273, 8, 10), new Spike(866, 124, 0),
-				   new Platform(762, 120, 9, 10), new Death(914, 21, 51, 5)];
-collidables[61] = [];
+				   new Platform(762, 120, 9, 10), new Death(914, 21, 51, 5),
+                   new Portal(width - 30, 630, 1, {x: 66, y: 689}, true)];
+collidables[61] = [new Platform(0, 0, 450, 31), new Platform(0, 31, 31, 588),
+                   new Platform(0, 719, width, 31), new Platform(550, 0, 450, 31),
+                   new Platform(969, 31, 31, 2), new Platform(969, 133, 31, 586),
+                   new Portal(0, 619, 0, {x: 935, y: 700}, true),
+                   new Portal(450, 0, 2, {x: 0, y: 0}, false),
+                   new Portal(width - 30, 33, 8, {x: 0, y: 0}, true)];
 collidables[70] = [new Platform(0, 690, width, 60), new EndGoal(width - 30, 590),
                    new Platform(968, 540, 32, 50)];
 
@@ -475,7 +479,7 @@ Spring.prototype.render = function() {
 }
 
 function Portal(x, y, toScreen, newLoc, vertical) {
-	this.x = x;
+    this.x = x;
 	this.y = y;
 	if(vertical) {
 		this.width = 30;
@@ -484,16 +488,15 @@ function Portal(x, y, toScreen, newLoc, vertical) {
 		this.width = 100;
 		this.height = 30;
 	}
-	this.newLoc = newLoc;
+    
 	this.onTouch = function() {
-	this.toScreen = toScreen;
-		screen = toScreen;
-		let start = newLoc;
-        this.x = start.x;
-        this.y = start.y;
-        this.x_speed = 0;
-        this.y_speed = 0;
-        this.isFalling = false;
+        screen = toScreen;
+        let start = newLoc;
+        ball.x = start.x;
+        ball.y = start.y;
+        ball.x_speed = 0;
+        ball.y_speed = 0;
+        ball.isFalling = false;
         keysDown = {};
 	};
 }
@@ -550,6 +553,10 @@ Box.prototype.render = function() {
 };
 
 var ball = new Ball();
+
+// initial position
+ball.x = 500;
+ball.y = 700;
 
 Ball.prototype.jump = function() {
     if(!this.isFalling) {
@@ -628,7 +635,7 @@ function EndGoal(x, y) {
     this.onTouch = function() {
 		if(impossible && level == 7) return;
         if(this.meetsRequirements()) {
-            let coll = collidables[10 * level + screen];
+            let coll = collidables[level * 10 + screen];
             for(let i = 0;i<coll.length;i++) {
                 let col = coll[i];
                 if(col instanceof Ring) {
@@ -681,10 +688,11 @@ function Death(x, y, width, height) {
     this.height = height;
 
     this.onTouch = function() {
+        console.info("Collided /w Death @ " + this.x + ", " + this.y);
         alert("You died!\nGet good");
         screen = 0;
         ball.reset();
-        let coll = collidables[10 * level + screen];
+        let coll = collidables[level * 10 + screen];
         for(let i = 0;i<coll.length;i++) {
             let col = coll[i];
             if(col instanceof Ring) {
@@ -722,10 +730,11 @@ function Spike(x, y, orientation){
     }
 
     this.onTouch = function() {
+        console.info("Collided /w Spike @ " + this.x + ", " + this.y);
         alert("You died!\nGet good");
         screen = 0;
         ball.reset();
-        let coll = collidables[10 * level + screen];
+        let coll = collidables[level * 10 + screen];
         for(let i = 0;i<coll.length;i++) {
             let col = coll[i];
             if(col instanceof Ring) {
@@ -856,11 +865,11 @@ var collisionFor = function(level, screen) {
             ball.forceRight(34);
             ball.forceBelow(47);
             break;
-		case 6:
+		/*case 6:
 			switch(screen) {
 				
 			}
-			break;
+			break;*/
         case 7:
             ball.forceRight(0);
             ball.forceLeft(width);
@@ -869,15 +878,16 @@ var collisionFor = function(level, screen) {
 }
 
 var checkAllCollisions = function() {
-    let num = 10 * level + screen;
+    let num = level * 10 + screen;
     let collides_ = collidables[num];
 
     let shouldFall = true;
-
+    
     for(let i = 0;i<collides_.length;i++) {
         let thing = collides_[i];
         if(collides(ball, thing)) {
-			if(shouldFall && (thing instanceof Platform || thing instanceof Building || (thing instanceof Kaizo && thing.touched))) {
+			if(shouldFall && (thing instanceof Platform || thing instanceof Building 
+                              || (thing instanceof Kaizo && thing.touched))) {
                 shouldFall = collideSide(ball, thing) != "t";
             }
             thing.onTouch();
@@ -987,7 +997,7 @@ var menu = function() {
                         screen = 0;
                         ball.reset();
                         ringsTouched = 0;
-						let coll = collidables[10 * level + screen];
+						let coll = collidables[level * 10 + screen];
 						for(let i = 0;i<coll.length;i++) {
 							let col = coll[i];
 							if(col instanceof Ring) {
@@ -1168,7 +1178,7 @@ var render = function() {
 
     ball.render();
 
-    let num = 10 * level + screen;
+    let num = level * 10 + screen;
     let collides_ = collidables[num];
 
     for (let i = 0;i<collides_.length;i++) {
