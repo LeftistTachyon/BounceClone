@@ -195,9 +195,7 @@ collidables[50] = [new Spike(350, 723, 3), new Spike(855, 723, 3),
 				   new Spike(450, 528, 0), new Spike(419, 528, 0),
 				   new Spike(389, 528, 0), new Spike(361, 528, 0),
 				   new Spike(330, 528, 0), new Platform(321, 493, 53, 14),
-
-				   new Platform(365, 718, 1, 1),
-				   new Ring(516, 644),
+				   new Platform(365, 718, 1, 1), new Ring(516, 644),
 				   new Death(529, 603, 223, 49), new Ring(841, 649),
 				   new Platform(870, 718, 1, 1)];
 collidables[60] = [new Spike(963, 96, 0), new Spike(889, 221, 0),
@@ -270,6 +268,42 @@ collidables[60] = [new Spike(963, 96, 0), new Spike(889, 221, 0),
 collidables[61] = [new Platform(0, 0, 450, 31), new Platform(0, 31, 31, 588),
                    new Platform(0, 719, width, 31), new Platform(550, 0, 450, 31),
                    new Platform(969, 31, 31, 2), new Platform(969, 133, 31, 586),
+                   new Platform(65, 143, 100, 15), new Platform(100, 323, 100, 15),
+                   new Platform(135, 503, 100, 15), new Platform(170, 683, 100, 15),
+                   new Platform(301, 208, 15, 511), new Platform(315, 208, 100, 15),
+                   new Platform(450, 125, 100, 15), new Platform(580, 273, 100, 15),
+                   new Platform(438, 381, 100, 15), new Platform(355, 552, 100, 15),
+                   new Platform(612, 485, 96, 15), new Platform(512, 650, 100, 15),
+                   new Platform(708, 31, 15, 511), new Spring(771, 709, 150, 10, -27),
+                   new Platform(723, 137, 97, 15), 
+                   new Platform(723, 167, 96, 15),
+                   new Platform(723, 197, 95, 15), 
+                   new Platform(723, 227, 94, 15), 
+                   new Platform(723, 257, 93, 15), 
+                   new Platform(723, 287, 92, 15), 
+                   new Platform(723, 317, 91, 15), 
+                   new Platform(723, 347, 90, 15), 
+                   new Platform(723, 377, 89, 15), 
+                   new Platform(723, 407, 88, 15), 
+                   new Platform(723, 437, 87, 15), 
+                   new Platform(723, 467, 86, 15), 
+                   new Platform(723, 497, 85, 15), 
+                   new Platform(723, 527, 84, 15), 
+                   
+                   new Platform(891, 137, 88, 15), 
+                   new Platform(890, 167, 89, 15), 
+                   new Platform(889, 197, 90, 15), 
+                   new Platform(888, 227, 91, 15), 
+                   new Platform(887, 257, 92, 15), 
+                   new Platform(886, 287, 93, 15), 
+                   new Platform(885, 317, 94, 15), 
+                   new Platform(884, 347, 95, 15), 
+                   new Platform(883, 377, 96, 15), 
+                   new Platform(882, 407, 97, 15), 
+                   new Platform(881, 437, 98, 15), 
+                   new Platform(880, 467, 99, 15), 
+                   new Platform(879, 497, 100, 15), 
+                   new Platform(878, 527, 101, 15), 
                    new Portal(0, 619, 0, {x: 935, y: 700}, true),
                    new Portal(450, 0, 2, {x: 0, y: 0}, false),
                    new Portal(width - 30, 33, 8, {x: 0, y: 0}, true)];
@@ -555,7 +589,7 @@ Box.prototype.render = function() {
 var ball = new Ball();
 
 // initial position
-ball.x = 500;
+ball.x = 440;
 ball.y = 700;
 
 Ball.prototype.jump = function() {
